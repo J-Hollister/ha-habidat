@@ -31,13 +31,20 @@ DATA_PATH = "src/php/vecino/selectViviendas.php"
 SESSION_PATH = "src/php/get_session_user.php"
 
 _TIMEOUT = aiohttp.ClientTimeout(total=60)
+# What the web app sends; some PHP endpoints look at Origin/Referer.
+_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Origin": "https://plataforma.habidat.es",
+    "Referer": "https://plataforma.habidat.es/",
+}
 _FORM_RE = re.compile(r"<form\b[^>]*\bid=\"kc-form-login\"[^>]*>", re.IGNORECASE)
 _ACTION_RE = re.compile(r"\baction=\"([^\"]+)\"", re.IGNORECASE)
 _ERROR_RE = re.compile(
-    r"<span[^>]*id=\"input-error\"[^>]*>(.*?)</span>|"
-    r"<div[^>]*class=\"[^\"]*alert-error[^\"]*\"[^>]*>(.*?)</div>",
+    r"<span[^>]*id=\"input-error[^\"]*\"[^>]*>(.*?)</span>|"
+    r"<div[^>]*class=\"[^\"]*(?:alert-error|kc-feedback|feedback-error)[^\"]*\"[^>]*>(.*?)</div>",
     re.IGNORECASE | re.DOTALL,
 )
+_TITLE_RE = re.compile(r"<h1[^>]*id=\"kc-page-title\"[^>]*>(.*?)</h1>", re.IGNORECASE | re.DOTALL)
 
 
 class HabidatError(Exception):
@@ -197,20 +204,39 @@ class HabidatClient:
         self._lock = asyncio.Lock()
         self.user: dict[str, Any] | None = None
 
-    async def close(self) -> None:
-        """Close the HTTP session."""
-        await self._session.close()
+    def close(self) -> None:
+        """Release the HTTP session (Home Assistant owns the connector)."""
+        detach = getattr(self._session, "detach", None)
+        if detach:
+            detach()
 
     # -- session -----------------------------------------------------------
+
+    async def _seguir(self, method: str, url: URL | str, **kwargs: Any) -> tuple[URL, str]:
+        """Request following redirects by hand, logging every hop (no secrets)."""
+        for _ in range(10):
+            async with self._session.request(
+                method, url, allow_redirects=False, timeout=_TIMEOUT, **kwargs
+            ) as resp:
+                status = resp.status
+                destino = resp.headers.get("Location")
+                cuerpo = await resp.text()
+                actual = resp.url
+            _LOGGER.debug("Login: %s %s%s -> %s", method, actual.host, actual.path, status)
+            if status in (301, 302, 303, 307, 308) and destino:
+                url = actual.join(URL(destino, encoded=True))
+                if status != 307 and status != 308:
+                    method, kwargs = "GET", {}
+                continue
+            return actual, cuerpo
+        raise HabidatError("Too many redirects while logging in")
 
     async def login(self) -> dict[str, Any]:
         """Open a PHP session through ista's Keycloak form."""
         self._session.cookie_jar.clear()
         self._logged_in = False
         try:
-            async with self._session.get(BASE_URL, timeout=_TIMEOUT) as resp:
-                page = await resp.text()
-                url = resp.url
+            url, page = await self._seguir("GET", BASE_URL)
             if url.host != LOGIN_HOST:
                 # Already logged in (cookies survived): just check it.
                 return await self._check_session()
@@ -223,17 +249,11 @@ class HabidatClient:
             if action_url.host != LOGIN_HOST:
                 raise HabidatError(f"Unexpected login form target: {action_url.host}")
 
-            async with self._session.post(
+            url, page = await self._seguir(
+                "POST",
                 action_url,
-                data={
-                    "username": self._email,
-                    "password": self._password,
-                    "credentialId": "",
-                },
-                timeout=_TIMEOUT,
-            ) as resp:
-                page = await resp.text()
-                url = resp.url
+                data={"username": self._email, "password": self._password, "credentialId": ""},
+            )
         except (aiohttp.ClientError, TimeoutError) as err:
             raise HabidatConnectionError(str(err)) from err
 
@@ -244,20 +264,30 @@ class HabidatClient:
             if match := _ERROR_RE.search(page):
                 raw = next(g for g in match.groups() if g)
                 message = html.unescape(re.sub(r"<[^>]+>", "", raw)).strip()
+            if not message and (title := _TITLE_RE.search(page)):
+                message = "ista asks for: " + html.unescape(title.group(1)).strip()
+            _LOGGER.debug("Login rejected on %s: %s", url.path, message)
             raise HabidatAuthError(message or "Login rejected by login.ista.com")
 
+        _LOGGER.debug("Login finished on %s%s", url.host, url.path)
         return await self._check_session()
 
     async def _check_session(self) -> dict[str, Any]:
         try:
             user = await self._fetch("GET", SESSION_PATH, None)
         except _SessionExpired as err:
-            raise HabidatAuthError("No session after login") from err
+            _LOGGER.debug("No PHP session after login; cookies: %s", self._cookies())
+            raise HabidatAuthError("Habidat did not open a session after login") from err
         if not isinstance(user, dict) or "id" not in user:
-            raise HabidatAuthError("No session after login")
+            _LOGGER.debug("Unexpected session answer: %s", str(user)[:120])
+            raise HabidatAuthError("Habidat did not open a session after login")
         self._logged_in = True
         self.user = user
         return user
+
+    def _cookies(self) -> list[str]:
+        """Cookie names and domains (never values) for the logs."""
+        return sorted({f"{c.key}@{c['domain'] or '?'}" for c in self._session.cookie_jar})
 
     async def _fetch(self, method: str, path: str, params: dict[str, str] | None) -> Any:
         try:
@@ -267,8 +297,18 @@ class HabidatClient:
                 params=params,
                 allow_redirects=False,
                 timeout=_TIMEOUT,
+                headers=_HEADERS,
             ) as resp:
                 if resp.status in (301, 302, 303, 307, 401, 403):
+                    _LOGGER.debug(
+                        "%s %s (%s) -> %s %s %s",
+                        method,
+                        path,
+                        (params or {}).get("list", ""),
+                        resp.status,
+                        resp.headers.get("Location", ""),
+                        (await resp.text())[:120],
+                    )
                     raise _SessionExpired
                 if resp.status >= 400:
                     raise HabidatError(f"HTTP {resp.status} on {path}")
@@ -281,6 +321,7 @@ class HabidatClient:
         try:
             return json.loads(text)
         except ValueError as err:
+            _LOGGER.debug("Not JSON from %s: %r", path, text[:200])
             if "<html" in text[:200].lower():
                 raise _SessionExpired from err
             raise HabidatError(f"Unexpected answer from {path}: {text[:80]!r}") from err
@@ -416,13 +457,6 @@ class HabidatClient:
     async def recargas(self, vivienda: str) -> list[dict[str, Any]]:
         """Top-ups of prepaid dwellings."""
         return await self._call("GET", "recargas", vivienda=vivienda) or []
-
-    async def recomendacion(self) -> str | None:
-        """Saving tip of the day."""
-        data = await self._call("POST", "recomendacion_informe")
-        if isinstance(data, dict):
-            return data.get("recomendacion")
-        return None
 
     async def prediccion(self, vivienda: str) -> list[dict[str, Any]]:
         """Weather based consumption forecast (empty in many buildings)."""

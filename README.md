@@ -26,7 +26,7 @@ Un aparato por vivienda y, **por cada suministro** que tenga (calefacción, ACS�
 | … del edificio en el periodo | Consumo de todo el edificio en el periodo |
 | … parte del edificio | Qué porcentaje del edificio es tuyo |
 
-Y de la vivienda: **último recibo** (importe, periodo, consumos, fijos, precios y la lista de recibos en los atributos), **inicio del periodo**, **saldo** (solo en comunidades de prepago) y el **consejo de ahorro** del día.
+Y de la vivienda: **último recibo** (importe, periodo, consumos, fijos, precios y la lista de recibos en los atributos), **inicio del periodo** y **saldo** (solo en comunidades de prepago).
 
 ### Histórico y panel de Energía
 
@@ -75,7 +75,7 @@ Habidat no tiene API pública. La integración entra igual que el navegador (for
 Unofficial integration for **Habidat**, the platform ista uses in Spain to split central heating (and, in some buildings, hot or cold water) between neighbours.
 
 - Sensors per supply: meter reading, last day, reading date, current period total, estimated cost, price on the last bill, daily average this month (and same month last year), building average per dwelling, building total and your share.
-- Per dwelling: last bill (with all bills in the attributes), period start, balance (prepaid buildings only) and the daily saving tip.
+- Per dwelling: last bill (with all bills in the attributes), period start and balance (prepaid buildings only).
 - Full daily history imported as long-term statistics, **each day on its own date** (`habidat:<dwelling>_<supply>_consumo` and `_coste`). Use those in the Energy dashboard rather than the meter sensor, because Habidat publishes with a delay of one or two days.
 
 Install through HACS as a custom repository (`https://github.com/J-Hollister/ha-habidat`, type *Integration*), restart, then add **Habidat** with your plataforma.habidat.es email and password.

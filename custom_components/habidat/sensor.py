@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import CURRENCY_EURO, PERCENTAGE, EntityCategory
+from homeassistant.const import CURRENCY_EURO, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -256,13 +256,6 @@ VIVIENDA_SENSORES: tuple[ViviendaDescription, ...] = (
         suggested_display_precision=2,
         value_fn=lambda d: d.saldo,
         exists_fn=lambda d: d.saldo is not None,
-    ),
-    ViviendaDescription(
-        key="consejo",
-        translation_key="consejo",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda d: (d.recomendacion or "")[:255] or None,
-        attrs_fn=lambda d: {"texto": d.recomendacion},
     ),
 )
 

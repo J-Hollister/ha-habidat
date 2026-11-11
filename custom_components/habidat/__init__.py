@@ -36,6 +36,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: HabidatConfigEntry) -> b
 
 async def async_unload_entry(hass: HomeAssistant, entry: HabidatConfigEntry) -> bool:
     """Unload a config entry."""
-    if ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        await entry.runtime_data.client.close()
-    return ok
+    # The HTTP session was created during setup, so Home Assistant releases it.
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

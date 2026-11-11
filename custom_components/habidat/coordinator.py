@@ -60,7 +60,6 @@ class HabidatData:
     suministros: dict[str, Suministro]
     facturas: list[dict[str, Any]]
     saldo: float | None
-    recomendacion: str | None
     numero_viviendas: int | None
 
 
@@ -136,7 +135,6 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
         acumulado = await c.acumulado_periodo(vid)
         edificio = await c.consumo_edificio(vid)
         facturas = await c.facturas(vid)
-        recomendacion = await c.recomendacion()
 
         prepago = str(comunidad.get("prepago", "0")) == "1"
         saldo = await c.saldo(vid, cid) if prepago else None
@@ -182,7 +180,6 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
             suministros=suministros,
             facturas=facturas,
             saldo=saldo,
-            recomendacion=recomendacion,
             numero_viviendas=numero_viviendas,
         )
 

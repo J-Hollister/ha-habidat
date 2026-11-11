@@ -45,14 +45,17 @@ class HabidatConfigFlow(ConfigFlow, domain=DOMAIN):
         """Initialise."""
         self._datos: dict[str, Any] = {}
         self._viviendas: list[Vivienda] = []
+        self._detalle = ""
 
     async def _probar(self, email: str, password: str) -> tuple[list[Vivienda], str | None]:
+        self._detalle = ""
         client = crear_cliente(self.hass, email, password, auto_cleanup=False)
         try:
             await client.login()
             return await client.viviendas(), None
         except HabidatAuthError as err:
-            _LOGGER.debug("Habidat login rejected: %s", err)
+            _LOGGER.info("Habidat login rejected: %s", err)
+            self._detalle = str(err)
             return [], "invalid_auth"
         except HabidatConnectionError:
             return [], "cannot_connect"
@@ -60,7 +63,7 @@ class HabidatConfigFlow(ConfigFlow, domain=DOMAIN):
             _LOGGER.exception("Unexpected answer from Habidat")
             return [], "unknown"
         finally:
-            await client.close()
+            client.close()
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Email and password."""
@@ -89,6 +92,7 @@ class HabidatConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=self.add_suggested_values_to_schema(CREDENCIALES, user_input),
             errors=errors,
+            description_placeholders={"detalle": self._detalle},
         )
 
     async def async_step_vivienda(
@@ -146,4 +150,5 @@ class HabidatConfigFlow(ConfigFlow, domain=DOMAIN):
                 CREDENCIALES, {CONF_EMAIL: entry.data[CONF_EMAIL]}
             ),
             errors=errors,
+            description_placeholders={"detalle": self._detalle},
         )

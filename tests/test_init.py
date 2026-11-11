@@ -64,7 +64,7 @@ async def test_sensores(hass: HomeAssistant, mock_habidat) -> None:
     assert recibo.attributes["periodo_desde"] == "2026-03-26"
     assert recibo.attributes["periodo_hasta"] == "2026-05-25"
     assert len(recibo.attributes["recibos"]) == 2
-    assert _estado(hass, "1001_consejo").state.startswith("Baja las persianas")
+    assert er.async_get(hass).async_get_entity_id("sensor", DOMAIN, "1001_consejo") is None
     # No prepaid: no balance sensor
     assert er.async_get(hass).async_get_entity_id("sensor", DOMAIN, "1001_saldo") is None
 

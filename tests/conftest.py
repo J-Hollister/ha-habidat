@@ -128,7 +128,6 @@ def mock_habidat():
         "consumo_edificio": AsyncMock(return_value={"CALEF": 2928.2}),
         "facturas": AsyncMock(return_value=FACTURAS),
         "saldo": AsyncMock(return_value=None),
-        "recomendacion": AsyncMock(return_value="Baja las persianas por la noche."),
     }
     with patch.multiple("custom_components.habidat.api.HabidatClient", **mocks):
         yield mocks

@@ -13,8 +13,7 @@
       "porcentaje_edificio": { "default": "mdi:chart-pie" },
       "ultimo_recibo": { "default": "mdi:receipt-text-outline" },
       "inicio_periodo": { "default": "mdi:calendar-start" },
-      "saldo": { "default": "mdi:wallet-outline" },
-      "consejo": { "default": "mdi:lightbulb-on-outline" }
+      "saldo": { "default": "mdi:wallet-outline" }
     }
   }
 }

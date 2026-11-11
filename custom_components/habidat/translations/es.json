@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Habidat (ista España)",
-        "description": "El mismo email y contraseña que en plataforma.habidat.es.",
+        "description": "El mismo email y contraseña que en plataforma.habidat.es.\n\n{detalle}",
         "data": {
           "email": "Email",
           "password": "Contraseña"
@@ -18,7 +18,7 @@
       },
       "reauth_confirm": {
         "title": "Vuelve a entrar en Habidat",
-        "description": "Habidat ha rechazado los datos guardados. Escríbelos otra vez.",
+        "description": "Habidat ha rechazado los datos guardados. Escríbelos otra vez.\n\n{detalle}",
         "data": {
           "email": "Email",
           "password": "Contraseña"
@@ -77,9 +77,6 @@
       },
       "saldo": {
         "name": "Saldo"
-      },
-      "consejo": {
-        "name": "Consejo de ahorro"
       }
     }
   }

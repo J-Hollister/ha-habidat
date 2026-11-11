@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Habidat (ista Spain)",
-        "description": "Use the same email and password as on plataforma.habidat.es.",
+        "description": "Use the same email and password as on plataforma.habidat.es.\n\n{detalle}",
         "data": {
           "email": "Email",
           "password": "Password"
@@ -18,7 +18,7 @@
       },
       "reauth_confirm": {
         "title": "Log in to Habidat again",
-        "description": "Habidat refused the saved credentials. Enter them again.",
+        "description": "Habidat refused the saved credentials. Enter them again.\n\n{detalle}",
         "data": {
           "email": "Email",
           "password": "Password"
@@ -77,9 +77,6 @@
       },
       "saldo": {
         "name": "Balance"
-      },
-      "consejo": {
-        "name": "Saving tip"
       }
     }
   }
