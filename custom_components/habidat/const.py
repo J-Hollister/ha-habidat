@@ -21,6 +21,8 @@ STATISTICS_WINDOW_MONTHS: Final = 6
 # Estimated cost of the current period: price of the same month in up to
 # this many previous years (from the bills that covered those days)...
 PRECIO_MES_ANOS: Final = 3
+# A month only counts if it has at least this many daily readings.
+DIAS_MINIMOS_MES: Final = 20
 # ...or, if those months have no bill, the average of this many years of bills.
 PRECIO_MEDIO_ANOS: Final = 2
 

@@ -23,6 +23,7 @@ from .api import (
     parse_day,
 )
 from .const import (
+    DIAS_MINIMOS_MES,
     DOMAIN,
     PRECIO_MEDIO_ANOS,
     PRECIO_MES_ANOS,
@@ -171,7 +172,11 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
         for k in range(1, PRECIO_MES_ANOS + 1):
             sel, _ = await c.lecturas_mes(cid, vid, f"{hoy.year - k:04d}-{hoy.month:02d}")
             for t, lecturas in sel.items():
-                mismo_mes.setdefault(t, []).extend(lecturas)
+                # Only months with real daily readings: the first bill of a
+                # meter can come as one lump per month (the reading from 0
+                # split evenly), which is not that month's consumption.
+                if len(lecturas) >= DIAS_MINIMOS_MES:
+                    mismo_mes.setdefault(t, []).extend(lecturas)
 
         numero = comunidad.get("cantidad_viviendas")
         try:
