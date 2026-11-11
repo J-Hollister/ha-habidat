@@ -1,6 +1,6 @@
 {
   "domain": "habidat",
-  "name": "Habidat (ista Spain)",
+  "name": "Habidat (ista España)",
   "codeowners": ["@J-Hollister"],
   "config_flow": true,
   "dependencies": ["recorder"],
@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/J-Hollister/ha-habidat/issues",
   "loggers": ["custom_components.habidat"],
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

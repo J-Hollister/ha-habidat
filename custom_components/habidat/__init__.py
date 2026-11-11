@@ -1,4 +1,4 @@
-"""Habidat (ista Spain) integration."""
+"""Habidat (ista España) integration."""
 
 from __future__ import annotations
 

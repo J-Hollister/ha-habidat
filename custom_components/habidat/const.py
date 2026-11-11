@@ -1,4 +1,4 @@
-"""Constants for the Habidat (ista Spain) integration."""
+"""Constants for the Habidat (ista España) integration."""
 
 from __future__ import annotations
 
