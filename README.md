@@ -2,6 +2,7 @@
 
 # Habidat (ista España) para Home Assistant
 
+[![release](https://img.shields.io/github/v/release/J-Hollister/ha-habidat)](https://github.com/J-Hollister/ha-habidat/releases)
 [![hacs](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![Validate](https://github.com/J-Hollister/ha-habidat/actions/workflows/validate.yml/badge.svg)](https://github.com/J-Hollister/ha-habidat/actions/workflows/validate.yml)
 
