@@ -12,6 +12,8 @@ Integración no oficial que lee tus datos de **[Habidat](https://plataforma.habi
 
 ## Qué da
 
+<p align="center"><img src="docs/sensores.png" width="420" alt="Sensores de Habidat en Home Assistant"></p>
+
 Un aparato por vivienda y, **por cada suministro** que tenga (calefacción, ACS…):
 
 | Sensor | Qué es |
@@ -80,5 +82,7 @@ Unofficial integration for **Habidat**, the platform ista uses in Spain to split
 - Full daily history imported as long-term statistics, **each day on its own date** (`habidat:<dwelling>_<supply>_consumo` and `_coste`). Use those in the Energy dashboard rather than the meter sensor, because Habidat publishes with a delay of one or two days.
 
 Install through HACS as a custom repository (`https://github.com/J-Hollister/ha-habidat`, type *Integration*), restart, then add **Habidat** with your plataforma.habidat.es email and password.
+
+![Sensors](docs/sensores.png)
 
 Not affiliated with ista or Habidat. MIT licence.
