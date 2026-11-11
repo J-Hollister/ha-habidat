@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/J-Hollister/ha-habidat/issues",
   "loggers": ["custom_components.habidat"],
   "requirements": [],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }

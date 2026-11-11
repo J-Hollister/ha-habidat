@@ -49,7 +49,9 @@ async def test_sensores(hass: HomeAssistant, mock_habidat) -> None:
 
     assert float(_estado(hass, "1001_calef_ultimo_dia").state) == 10.0
     assert float(_estado(hass, "1001_calef_periodo").state) == 52.6
-    assert float(_estado(hass, "1001_calef_coste_estimado").state) == round(52.6 * 0.285354, 2)
+    coste = _estado(hass, "1001_calef_coste_estimado")
+    assert coste.attributes["recibos_en_la_media"] == 1
+    assert float(coste.state) == round(52.6 * round(65.86 / 230.8, 6), 2)
     assert float(_estado(hass, "1001_calef_precio").state) == 0.285354
     assert _estado(hass, "1001_calef_precio").attributes["unit_of_measurement"] == "€/kWh"
     assert float(_estado(hass, "1001_calef_media_diaria_mes").state) == 37.6

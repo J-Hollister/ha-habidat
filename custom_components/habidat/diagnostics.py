@@ -52,6 +52,7 @@ async def async_get_config_entry_diagnostics(
             "consumo_edificio": s.consumo_edificio,
             "media_diaria_mes": s.media_diaria_mes,
             "precio_ultimo_recibo": s.precio_ultimo_recibo,
+            "precio_medio": s.precio_medio,
         }
         for k, s in data.suministros.items()
     }

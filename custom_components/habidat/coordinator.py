@@ -24,6 +24,7 @@ from .api import (
 )
 from .const import (
     DOMAIN,
+    PRECIO_MEDIO_ANOS,
     STATISTICS_MAX_MONTHS,
     STATISTICS_VERSION,
     STATISTICS_WINDOW_MONTHS,
@@ -50,6 +51,8 @@ class Suministro:
     importe_mes: float | None = None
     media_diaria_edificio_mes: float | None = None
     precio_ultimo_recibo: float | None = None
+    precio_medio: float | None = None
+    precio_medio_recibos: int = 0
 
     @property
     def ultima(self) -> Lectura | None:
@@ -165,6 +168,9 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
             s.acumulado_periodo = acumulado.get(tipo.nombre)
             s.consumo_edificio = edificio.get(tipo.nombre)
             s.precio_ultimo_recibo = (ultimo_recibo.get("precios_variables") or {}).get(tipo.nombre)
+            s.precio_medio, s.precio_medio_recibos = precio_medio(
+                facturas, tipo.nombre, hoy - timedelta(days=365 * PRECIO_MEDIO_ANOS)
+            )
             mes = informe.get(tipo.nombre) or {}
             vivienda_mes = mes.get("v") or {}
             edificio_mes = mes.get("c") or {}
@@ -252,6 +258,35 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
                 self.config_entry,
                 options={**self.config_entry.options, "historico": STATISTICS_VERSION},
             )
+
+
+def precio_medio(facturas: list[dict], tipo: str, desde: date) -> tuple[float | None, int]:
+    """Average price of the bills that ended after ``desde``, weighted by consumption.
+
+    Everything paid for ``tipo`` divided by all its kWh (or m³). The price of a
+    single bill swings a lot: the building's fuel is split between the kWh of
+    the period, so a mild period with little consumption comes out expensive.
+    """
+    euros = cantidad = 0.0
+    n = 0
+    for f in facturas:
+        hasta = parse_day(f.get("fecha_fin_periodo"))
+        datos = f.get(tipo) if isinstance(f.get(tipo), dict) else {}
+        try:
+            kwh = float(datos.get("consumo_periodo"))
+            importe = float(
+                (f.get("importes_variables") or {}).get(tipo, datos.get("importe_periodo"))
+            )
+        except (TypeError, ValueError):
+            continue
+        if not hasta or hasta < desde or kwh <= 0:
+            continue
+        euros += importe
+        cantidad += kwh
+        n += 1
+    if not cantidad:
+        return None, 0
+    return round(euros / cantidad, 6), n
 
 
 def precios_recibos(facturas: list[dict], tipo: str) -> list[tuple[date, date, float]]:

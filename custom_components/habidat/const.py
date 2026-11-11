@@ -18,6 +18,9 @@ UPDATE_INTERVAL: Final = timedelta(hours=6)
 # months lets those costs land on the days they belong to.
 STATISTICS_WINDOW_MONTHS: Final = 6
 
+# Years of bills used for the average price of the estimated cost.
+PRECIO_MEDIO_ANOS: Final = 2
+
 # Bump to rewrite the whole history once (e.g. after changing how it is computed).
 STATISTICS_VERSION: Final = 2
 

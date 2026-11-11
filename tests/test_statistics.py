@@ -40,3 +40,30 @@ def test_recibo_sin_precio() -> None:
         )
         == []
     )
+
+
+def test_precio_medio() -> None:
+    """Average price: everything paid divided by all the kWh of recent bills."""
+    from custom_components.habidat.coordinator import precio_medio
+
+    facturas = [
+        {
+            "fecha_fin_periodo": "2026-05-25",
+            "CALEF": {"consumo_periodo": 230.8},
+            "importes_variables": {"CALEF": 65.86},
+        },
+        {
+            "fecha_fin_periodo": "2026-01-25",
+            "CALEF": {"consumo_periodo": 979.4},
+            "importes_variables": {"CALEF": 107.68},
+        },
+        {
+            "fecha_fin_periodo": "2023-12-31",
+            "CALEF": {"consumo_periodo": 4795.3},
+            "importes_variables": {"CALEF": 390.77},
+        },
+    ]
+    precio, n = precio_medio(facturas, "CALEF", date(2024, 11, 11))
+    assert n == 2
+    assert precio == round((65.86 + 107.68) / (230.8 + 979.4), 6)
+    assert precio_medio([], "CALEF", date(2024, 1, 1)) == (None, 0)

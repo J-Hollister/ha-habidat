@@ -59,9 +59,10 @@ class SuministroDescription(SensorEntityDescription):
 
 
 def _coste_estimado(s: Suministro, _: HabidatData) -> float | None:
-    if s.acumulado_periodo is None or s.precio_ultimo_recibo is None:
+    precio = s.precio_medio if s.precio_medio is not None else s.precio_ultimo_recibo
+    if s.acumulado_periodo is None or precio is None:
         return None
-    return round(s.acumulado_periodo * s.precio_ultimo_recibo, 2)
+    return round(s.acumulado_periodo * precio, 2)
 
 
 def _porcentaje(s: Suministro, _: HabidatData) -> float | None:
@@ -141,7 +142,11 @@ SUMINISTRO_SENSORES: tuple[SuministroDescription, ...] = (
         unit="money",
         suggested_display_precision=2,
         value_fn=_coste_estimado,
-        attrs_fn=lambda s, _: {"precio_usado": s.precio_ultimo_recibo},
+        attrs_fn=lambda s, _: {
+            "precio_medio": s.precio_medio,
+            "recibos_en_la_media": s.precio_medio_recibos,
+            "precio_ultimo_recibo": s.precio_ultimo_recibo,
+        },
     ),
     SuministroDescription(
         key="precio",

@@ -22,7 +22,7 @@ Un aparato por vivienda y, **por cada suministro** que tenga (calefacción, ACS�
 | … último día | Consumo del último día publicado, con los últimos 30 días en los atributos |
 | Fecha de lectura de … | Día al que corresponde la última lectura (Habidat publica con uno o dos días de retraso) |
 | … en el periodo | Consumo desde el inicio del periodo de facturación |
-| Coste estimado de … en el periodo | Consumo del periodo × precio del último recibo |
+| Coste estimado de … en el periodo | Consumo del periodo × precio medio de tus recibos (ver abajo) |
 | Precio de … en el último recibo | €/kWh (o €/m³) del último recibo |
 | … media diaria del mes | Tu media diaria este mes, con la del mismo mes del año pasado en los atributos |
 | … media diaria por vivienda del edificio | La media del edificio repartida entre las viviendas, para compararte |
@@ -30,6 +30,14 @@ Un aparato por vivienda y, **por cada suministro** que tenga (calefacción, ACS�
 | … parte del edificio | Qué porcentaje del edificio es tuyo |
 
 Y de la vivienda: **último recibo** (importe, periodo, consumos, fijos, precios y la lista de recibos en los atributos), **inicio del periodo** y **saldo** (solo en comunidades de prepago).
+
+### Cómo se calculan los euros
+
+En los repartos por gastos el precio del kWh no se sabe hasta que se cierra el periodo: el combustible de la caldera del edificio se divide entre los kWh de todos los contadores. Por eso cambia mucho de un recibo a otro (en un periodo templado, con poco consumo, el kWh sale caro).
+
+- **Días ya facturados**: kWh de ese día × precio del recibo que lo cubre. Sumados, dan exactamente el importe variable de cada recibo. El coste diario que publica Habidat no se usa para estos días: a veces conserva un precio provisional distinto del que se cobró.
+- **Periodo en curso** (aún sin recibo): kWh del periodo × **precio medio de los recibos de los últimos 2 años**, ponderado por consumo, es decir, todo lo pagado de ese suministro entre todos sus kWh. Es una estimación: el recibo real puede salir algo por encima o por debajo. El sensor lleva en sus atributos el precio medio, cuántos recibos entran en la media y el precio del último recibo.
+- Los importes fijos del recibo (gas, cuota, contador…) no entran en estos cálculos; están en el sensor del último recibo.
 
 ### Histórico y panel de Energía
 
@@ -77,7 +85,7 @@ Habidat no tiene API pública. La integración entra igual que el navegador (for
 
 Unofficial integration for **Habidat**, the platform ista uses in Spain to split central heating (and, in some buildings, hot or cold water) between neighbours.
 
-- Sensors per supply: meter reading, last day, reading date, current period total, estimated cost, price on the last bill, daily average this month (and same month last year), building average per dwelling, building total and your share.
+- Sensors per supply: meter reading, last day, reading date, current period total, estimated cost (period consumption × average price of your bills of the last 2 years, weighted by consumption), price on the last bill, daily average this month (and same month last year), building average per dwelling, building total and your share.
 - Per dwelling: last bill (with all bills in the attributes), period start and balance (prepaid buildings only).
 - Full daily history imported as long-term statistics, **each day on its own date** (`habidat:<dwelling>_<supply>_consumo` and `_coste`). Use those in the Energy dashboard rather than the meter sensor, because Habidat publishes with a delay of one or two days.
 
