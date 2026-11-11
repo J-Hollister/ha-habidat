@@ -1,0 +1,86 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Habidat (ista Spain)",
+        "description": "Use the same email and password as on plataforma.habidat.es.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "vivienda": {
+        "title": "Choose the dwelling",
+        "description": "This account has several dwellings. Add the integration again for each one you want.",
+        "data": {
+          "vivienda": "Dwelling"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Log in to Habidat again",
+        "description": "Habidat refused the saved credentials. Enter them again.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Wrong email or password, or the account needs an action on plataforma.habidat.es (log in there once).",
+      "cannot_connect": "Could not reach Habidat.",
+      "no_viviendas": "The account has no dwellings.",
+      "wrong_account": "This account does not include the dwelling of this entry.",
+      "unknown": "Unexpected answer from Habidat. See the logs."
+    },
+    "abort": {
+      "already_configured": "All the dwellings of this account are already configured.",
+      "reauth_successful": "Credentials updated."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "lectura": {
+        "name": "{suministro} meter reading"
+      },
+      "ultimo_dia": {
+        "name": "{suministro} last day"
+      },
+      "fecha_lectura": {
+        "name": "{suministro} reading date"
+      },
+      "periodo": {
+        "name": "{suministro} this period"
+      },
+      "coste_estimado": {
+        "name": "{suministro} estimated cost this period"
+      },
+      "precio": {
+        "name": "{suministro} price on last bill"
+      },
+      "media_diaria_mes": {
+        "name": "{suministro} daily average this month"
+      },
+      "media_diaria_edificio": {
+        "name": "{suministro} building daily average per dwelling"
+      },
+      "edificio_periodo": {
+        "name": "{suministro} building this period"
+      },
+      "porcentaje_edificio": {
+        "name": "{suministro} share of the building"
+      },
+      "ultimo_recibo": {
+        "name": "Last bill"
+      },
+      "inicio_periodo": {
+        "name": "Period start"
+      },
+      "saldo": {
+        "name": "Balance"
+      },
+      "consejo": {
+        "name": "Saving tip"
+      }
+    }
+  }
+}

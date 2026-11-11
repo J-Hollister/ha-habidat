@@ -1,0 +1,20 @@
+{
+  "entity": {
+    "sensor": {
+      "lectura": { "default": "mdi:counter" },
+      "ultimo_dia": { "default": "mdi:radiator" },
+      "fecha_lectura": { "default": "mdi:calendar-check" },
+      "periodo": { "default": "mdi:sigma" },
+      "coste_estimado": { "default": "mdi:cash-clock" },
+      "precio": { "default": "mdi:tag-outline" },
+      "media_diaria_mes": { "default": "mdi:chart-bell-curve-cumulative" },
+      "media_diaria_edificio": { "default": "mdi:office-building-outline" },
+      "edificio_periodo": { "default": "mdi:office-building" },
+      "porcentaje_edificio": { "default": "mdi:chart-pie" },
+      "ultimo_recibo": { "default": "mdi:receipt-text-outline" },
+      "inicio_periodo": { "default": "mdi:calendar-start" },
+      "saldo": { "default": "mdi:wallet-outline" },
+      "consejo": { "default": "mdi:lightbulb-on-outline" }
+    }
+  }
+}

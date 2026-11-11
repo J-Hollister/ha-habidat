@@ -1,0 +1,86 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Habidat (ista España)",
+        "description": "El mismo email y contraseña que en plataforma.habidat.es.",
+        "data": {
+          "email": "Email",
+          "password": "Contraseña"
+        }
+      },
+      "vivienda": {
+        "title": "Elige la vivienda",
+        "description": "Esta cuenta tiene varias viviendas. Añade la integración otra vez por cada una que quieras.",
+        "data": {
+          "vivienda": "Vivienda"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Vuelve a entrar en Habidat",
+        "description": "Habidat ha rechazado los datos guardados. Escríbelos otra vez.",
+        "data": {
+          "email": "Email",
+          "password": "Contraseña"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Email o contraseña incorrectos, o la cuenta tiene algo pendiente en plataforma.habidat.es (entra allí una vez).",
+      "cannot_connect": "No se ha podido conectar con Habidat.",
+      "no_viviendas": "La cuenta no tiene viviendas.",
+      "wrong_account": "Esta cuenta no incluye la vivienda de esta entrada.",
+      "unknown": "Habidat ha respondido algo inesperado. Mira el registro."
+    },
+    "abort": {
+      "already_configured": "Todas las viviendas de esta cuenta ya están configuradas.",
+      "reauth_successful": "Datos actualizados."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "lectura": {
+        "name": "Lectura de {suministro}"
+      },
+      "ultimo_dia": {
+        "name": "{suministro} último día"
+      },
+      "fecha_lectura": {
+        "name": "Fecha de lectura de {suministro}"
+      },
+      "periodo": {
+        "name": "{suministro} en el periodo"
+      },
+      "coste_estimado": {
+        "name": "Coste estimado de {suministro} en el periodo"
+      },
+      "precio": {
+        "name": "Precio de {suministro} en el último recibo"
+      },
+      "media_diaria_mes": {
+        "name": "{suministro} media diaria del mes"
+      },
+      "media_diaria_edificio": {
+        "name": "{suministro} media diaria por vivienda del edificio"
+      },
+      "edificio_periodo": {
+        "name": "{suministro} del edificio en el periodo"
+      },
+      "porcentaje_edificio": {
+        "name": "{suministro} parte del edificio"
+      },
+      "ultimo_recibo": {
+        "name": "Último recibo"
+      },
+      "inicio_periodo": {
+        "name": "Inicio del periodo"
+      },
+      "saldo": {
+        "name": "Saldo"
+      },
+      "consejo": {
+        "name": "Consejo de ahorro"
+      }
+    }
+  }
+}

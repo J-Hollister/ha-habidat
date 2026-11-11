@@ -1,0 +1,14 @@
+{
+  "domain": "habidat",
+  "name": "Habidat (ista Spain)",
+  "codeowners": ["@J-Hollister"],
+  "config_flow": true,
+  "dependencies": ["recorder"],
+  "documentation": "https://github.com/J-Hollister/ha-habidat",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/J-Hollister/ha-habidat/issues",
+  "loggers": ["custom_components.habidat"],
+  "requirements": [],
+  "version": "0.1.0"
+}
