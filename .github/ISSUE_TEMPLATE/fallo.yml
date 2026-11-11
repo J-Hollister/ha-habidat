@@ -1,0 +1,33 @@
+name: Algo no funciona / Bug report
+description: La integración falla o un dato no cuadra con la web de Habidat
+labels: [bug]
+body:
+  - type: textarea
+    id: que
+    attributes:
+      label: Qué pasa / What happens
+      description: Qué esperabas y qué ves. Si un dato no cuadra, pon el de la web y el de Home Assistant.
+    validations:
+      required: true
+  - type: input
+    id: versiones
+    attributes:
+      label: Versiones / Versions
+      placeholder: "Home Assistant 2026.11.1, Habidat 0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: diagnosticos
+    attributes:
+      label: Diagnósticos / Diagnostics
+      description: >-
+        Ajustes → Dispositivos y servicios → Habidat → ⋮ → Descargar diagnósticos, y arrastra el fichero aquí.
+        Los datos personales salen tapados.
+  - type: textarea
+    id: registro
+    attributes:
+      label: Registro / Log
+      description: >-
+        Si es un fallo al entrar, activa la depuración (Habidat → ⋮ → Activar registro de depuración),
+        repite, desactívala y pega lo que salga de custom_components.habidat. No lleva contraseñas.
+      render: text
