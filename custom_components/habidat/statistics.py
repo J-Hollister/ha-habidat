@@ -8,7 +8,7 @@ ones to use in the Energy dashboard.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import logging
 
 from homeassistant.components.recorder import get_instance
@@ -84,6 +84,14 @@ def _start(dia) -> datetime:
     return dt_util.as_utc(dt_util.start_of_local_day(dia))
 
 
+def coste_dia(x: Lectura, precios: list[tuple[date, date, float]]) -> float | None:
+    """Cost of one day: bill price if a bill covers it, else Habidat's estimate."""
+    for desde, hasta, precio in precios:
+        if desde <= x.dia <= hasta:
+            return round((x.incremento or 0.0) * precio, 6)
+    return x.importe_incremento
+
+
 async def async_import_history(
     hass: HomeAssistant,
     vivienda: Vivienda,
@@ -91,11 +99,18 @@ async def async_import_history(
     lecturas: list[Lectura],
     *,
     full: bool,
+    precios: list[tuple[date, date, float]] | None = None,
 ) -> None:
     """Write (or rewrite) daily consumption and cost for ``lecturas``.
 
     Rows that already exist are overwritten, so re-importing a window is safe
     and lets late costs (they appear once the bill is closed) fill in.
+
+    The cost of a day is its consumption times the price of the bill that
+    covers it (``precios``: first day, last day, price). Habidat's own daily
+    cost is only used for days without a bill: it sometimes keeps a
+    provisional price, or a stray value at a period edge, and then the days
+    do not add up to what was charged.
     """
     if not lecturas:
         return
@@ -127,17 +142,16 @@ async def async_import_history(
         filas,
     )
 
-    # Cost (only once the platform has priced at least one day)
-    if not any(x.importe_incremento is not None for x in lecturas):
-        coste_id = statistic_id(vivienda, tipo, "coste")
-        if not await async_has_statistics(hass, coste_id):
-            return
+    # Cost (only once at least one day has a price)
+    costes = [coste_dia(x, precios or []) for x in lecturas]
     coste_id = statistic_id(vivienda, tipo, "coste")
+    if all(c is None for c in costes) and not await async_has_statistics(hass, coste_id):
+        return
     total = 0.0 if full else await _sum_before(hass, coste_id, inicio)
     filas = []
-    for x in lecturas:
-        total += x.importe_incremento or 0.0
-        filas.append({"start": _start(x.dia), "state": x.importe_incremento or 0.0, "sum": total})
+    for x, c in zip(lecturas, costes, strict=True):
+        total += c or 0.0
+        filas.append({"start": _start(x.dia), "state": c or 0.0, "sum": total})
     async_add_external_statistics(
         hass,
         StatisticMetaData(

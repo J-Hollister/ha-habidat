@@ -18,6 +18,9 @@ UPDATE_INTERVAL: Final = timedelta(hours=6)
 # months lets those costs land on the days they belong to.
 STATISTICS_WINDOW_MONTHS: Final = 6
 
+# Bump to rewrite the whole history once (e.g. after changing how it is computed).
+STATISTICS_VERSION: Final = 2
+
 # How far back the first import goes when the platform does not list the
 # eligible months.
 STATISTICS_MAX_MONTHS: Final = 36

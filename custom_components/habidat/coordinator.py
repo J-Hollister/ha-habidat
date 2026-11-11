@@ -20,8 +20,15 @@ from .api import (
     Lectura,
     Tipo,
     Vivienda,
+    parse_day,
 )
-from .const import DOMAIN, STATISTICS_MAX_MONTHS, STATISTICS_WINDOW_MONTHS, UPDATE_INTERVAL
+from .const import (
+    DOMAIN,
+    STATISTICS_MAX_MONTHS,
+    STATISTICS_VERSION,
+    STATISTICS_WINDOW_MONTHS,
+    UPDATE_INTERVAL,
+)
 from .statistics import async_has_statistics, async_import_history, statistic_id
 
 _LOGGER = logging.getLogger(__name__)
@@ -201,7 +208,9 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
                 await async_has_statistics(self.hass, statistic_id(v, s.tipo, "consumo"))
                 for s in data.suministros.values()
             ]
-            self._historico_cargado = all(ya)
+            # A new way of computing the history rewrites it all once.
+            version = self.config_entry.options.get("historico", 1)
+            self._historico_cargado = all(ya) and version >= STATISTICS_VERSION
         if not self._historico_cargado:
             meses = await self.client.meses_informe(v.comunidad_id, v.id)
             primero = min(meses) if meses else None
@@ -229,5 +238,33 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
             if suministro is None:
                 continue
             lecturas.sort(key=lambda x: x.dia)
-            await async_import_history(self.hass, v, suministro.tipo, lecturas, full=primera_vez)
+            await async_import_history(
+                self.hass,
+                v,
+                suministro.tipo,
+                lecturas,
+                full=primera_vez,
+                precios=precios_recibos(data.facturas, tipo),
+            )
         self._historico_cargado = True
+        if primera_vez and self.config_entry.options.get("historico") != STATISTICS_VERSION:
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                options={**self.config_entry.options, "historico": STATISTICS_VERSION},
+            )
+
+
+def precios_recibos(facturas: list[dict], tipo: str) -> list[tuple[date, date, float]]:
+    """(first day, last day, price) of every bill that prices ``tipo``."""
+    out = []
+    for f in facturas:
+        desde = parse_day(f.get("fecha_inicio_periodo"))
+        hasta = parse_day(f.get("fecha_fin_periodo"))
+        precio = (f.get("precios_variables") or {}).get(tipo)
+        try:
+            precio = float(precio)
+        except (TypeError, ValueError):
+            continue
+        if desde and hasta:
+            out.append((desde, hasta, precio))
+    return out
