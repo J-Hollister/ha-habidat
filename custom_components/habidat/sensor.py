@@ -59,7 +59,7 @@ class SuministroDescription(SensorEntityDescription):
 
 
 def _coste_estimado(s: Suministro, _: HabidatData) -> float | None:
-    precio = s.precio_medio if s.precio_medio is not None else s.precio_ultimo_recibo
+    precio = s.precio_estimacion
     if s.acumulado_periodo is None or precio is None:
         return None
     return round(s.acumulado_periodo * precio, 2)
@@ -143,6 +143,9 @@ SUMINISTRO_SENSORES: tuple[SuministroDescription, ...] = (
         suggested_display_precision=2,
         value_fn=_coste_estimado,
         attrs_fn=lambda s, _: {
+            "precio_usado": s.precio_estimacion,
+            "precio_mismo_mes": s.precio_mes,
+            "anos_mismo_mes": s.precio_mes_anos,
             "precio_medio": s.precio_medio,
             "recibos_en_la_media": s.precio_medio_recibos,
             "precio_ultimo_recibo": s.precio_ultimo_recibo,

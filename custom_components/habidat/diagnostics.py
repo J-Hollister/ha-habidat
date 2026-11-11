@@ -53,6 +53,7 @@ async def async_get_config_entry_diagnostics(
             "media_diaria_mes": s.media_diaria_mes,
             "precio_ultimo_recibo": s.precio_ultimo_recibo,
             "precio_medio": s.precio_medio,
+            "precio_mes": s.precio_mes,
         }
         for k, s in data.suministros.items()
     }

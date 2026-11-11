@@ -67,3 +67,22 @@ def test_precio_medio() -> None:
     assert n == 2
     assert precio == round((65.86 + 107.68) / (230.8 + 979.4), 6)
     assert precio_medio([], "CALEF", date(2024, 1, 1)) == (None, 0)
+
+
+def test_precio_mismo_mes() -> None:
+    """Same month of previous years: each day at its bill price, weighted by kWh."""
+    from custom_components.habidat.coordinator import precio_mismo_mes
+
+    precios = [
+        (date(2025, 10, 1), date(2025, 11, 30), 0.141583),
+        (date(2024, 10, 22), date(2024, 11, 30), 0.12513),
+    ]
+    lecturas = [
+        _dia(date(2025, 11, 5), 20.0, None),
+        _dia(date(2024, 11, 5), 10.0, None),
+        _dia(date(2023, 11, 5), 50.0, 9.0),  # no bill covers it: ignored
+    ]
+    precio, anos = precio_mismo_mes(lecturas, precios)
+    assert anos == [2025, 2024]
+    assert precio == round((20 * 0.141583 + 10 * 0.12513) / 30, 6)
+    assert precio_mismo_mes([], precios) == (None, [])

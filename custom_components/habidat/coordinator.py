@@ -25,6 +25,7 @@ from .api import (
 from .const import (
     DOMAIN,
     PRECIO_MEDIO_ANOS,
+    PRECIO_MES_ANOS,
     STATISTICS_MAX_MONTHS,
     STATISTICS_VERSION,
     STATISTICS_WINDOW_MONTHS,
@@ -53,6 +54,16 @@ class Suministro:
     precio_ultimo_recibo: float | None = None
     precio_medio: float | None = None
     precio_medio_recibos: int = 0
+    precio_mes: float | None = None
+    precio_mes_anos: list[int] = field(default_factory=list)
+
+    @property
+    def precio_estimacion(self) -> float | None:
+        """Price used for the estimated cost: same month, else average, else last bill."""
+        for p in (self.precio_mes, self.precio_medio, self.precio_ultimo_recibo):
+            if p is not None:
+                return p
+        return None
 
     @property
     def ultima(self) -> Lectura | None:
@@ -155,6 +166,13 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
         if not informe:
             informe = await c.informe_mes(cid, vid, _mes(hoy.replace(day=1) - timedelta(days=1)))
 
+        # Same month of previous years, for the estimated cost.
+        mismo_mes: dict[str, list[Lectura]] = {}
+        for k in range(1, PRECIO_MES_ANOS + 1):
+            sel, _ = await c.lecturas_mes(cid, vid, f"{hoy.year - k:04d}-{hoy.month:02d}")
+            for t, lecturas in sel.items():
+                mismo_mes.setdefault(t, []).extend(lecturas)
+
         numero = comunidad.get("cantidad_viviendas")
         try:
             numero_viviendas = int(numero) if numero is not None else None
@@ -170,6 +188,9 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
             s.precio_ultimo_recibo = (ultimo_recibo.get("precios_variables") or {}).get(tipo.nombre)
             s.precio_medio, s.precio_medio_recibos = precio_medio(
                 facturas, tipo.nombre, hoy - timedelta(days=365 * PRECIO_MEDIO_ANOS)
+            )
+            s.precio_mes, s.precio_mes_anos = precio_mismo_mes(
+                mismo_mes.get(tipo.nombre, []), precios_recibos(facturas, tipo.nombre)
             )
             mes = informe.get(tipo.nombre) or {}
             vivienda_mes = mes.get("v") or {}
@@ -258,6 +279,30 @@ class HabidatCoordinator(DataUpdateCoordinator[HabidatData]):
                 self.config_entry,
                 options={**self.config_entry.options, "historico": STATISTICS_VERSION},
             )
+
+
+def precio_mismo_mes(
+    lecturas: list[Lectura], precios: list[tuple[date, date, float]]
+) -> tuple[float | None, list[int]]:
+    """Price of the same month in previous years: what those days cost / their kWh.
+
+    Only days covered by a bill count, each at that bill's price.
+    """
+    euros = cantidad = 0.0
+    anos: set[int] = set()
+    for x in lecturas:
+        kwh = x.incremento or 0.0
+        if kwh <= 0:
+            continue
+        for desde, hasta, precio in precios:
+            if desde <= x.dia <= hasta:
+                euros += kwh * precio
+                cantidad += kwh
+                anos.add(x.dia.year)
+                break
+    if not cantidad:
+        return None, []
+    return round(euros / cantidad, 6), sorted(anos, reverse=True)
 
 
 def precio_medio(facturas: list[dict], tipo: str, desde: date) -> tuple[float | None, int]:
